@@ -16,6 +16,7 @@ input_shape = (50, 50, 3)
 directories = []
 directories.append("../ImageClassifier/Cheat")
 directories.append("../ImageClassifier/Ok")
+directories.append("../ImageClassifier/TestingImages")
 
 # tamaño de las imágenes que se espera que el modelo reciba como entrada
 image_size = (224, 224)
@@ -69,21 +70,23 @@ except:
     print('No se ha encontrado el modelo pre-entrenado. Se creará un nuevo modelo.')
     model = Sequential()
 
-# Agregar capas convolucionales
-model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
-model.add(MaxPooling2D(pool_size=(2, 2)))
-model.add(Flatten())
+    # Agregar capas convolucionales
+    model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=input_shape))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Conv2D(128, kernel_size=(3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Flatten())
 
-# Agregar capas completamente conectadas
-model.add(Dense(128, activation='relu'))
-model.add(Dense(1, activation='sigmoid'))
+    # Agregar capas completamente conectadas
+    model.add(Dense(128, activation='relu'))
+    model.add(Dense(1, activation='sigmoid'))
 
-# Compilar el modelo
-model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+    # Compilar el modelo
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+
 
 # Entrenar el modelo con los datos de entrada y etiquetas correspondientes
 model.fit(x_train, y_train, batch_size=32, epochs=10, validation_split=0.2)
