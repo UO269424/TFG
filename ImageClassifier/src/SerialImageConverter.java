@@ -8,11 +8,11 @@ public class SerialImageConverter {
     private static String p = "Screenshots/";
     private static String targetFolder = //"Cheat/";
                                             //"Ok/";
-                                            "temp/";
+                                            "TestingImages/";
 
     private static String ending = //"_1.jpg";
-                                   // "_0.jpg";
-                                    ".jpg";
+                                    "_0.jpg";
+                                    //".jpg";
 
     public static void main(String[] args) {
 

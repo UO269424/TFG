@@ -16,7 +16,7 @@ input_shape = (50, 50, 3)
 directories = []
 directories.append("../ImageClassifier/Cheat")
 directories.append("../ImageClassifier/Ok")
-directories.append("../ImageClassifier/TestingImages")
+#directories.append("../ImageClassifier/TestingImages")
 
 # tamaño de las imágenes que se espera que el modelo reciba como entrada
 image_size = (224, 224)
