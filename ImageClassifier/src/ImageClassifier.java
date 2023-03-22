@@ -18,6 +18,8 @@ public class ImageClassifier extends JFrame implements ActionListener {
     private File cheatDirectory = new File("Cheat/");
     private File okDirectory = new File("Ok/");
 
+    private File testDirectory = new File("TestingImages/");
+
     private int resizeResolution = 50;
 
     private MyButtonKeyListener myButtonKeyListener;
@@ -96,7 +98,8 @@ public class ImageClassifier extends JFrame implements ActionListener {
         try {
             BufferedImage currentImage= ImageIO.read(currentImageFile);
             String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + "_1.jpg";
-            File archivoDestino = new File(cheatDirectory, nombreArchivo);
+            //File archivoDestino = new File(cheatDirectory, nombreArchivo);
+            File archivoDestino = new File(testDirectory, nombreArchivo);
             BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
             ImageIO.write(nuevaImagen, "jpg", archivoDestino);
             nextButton.doClick();
@@ -110,7 +113,8 @@ public class ImageClassifier extends JFrame implements ActionListener {
         try {
             BufferedImage currentImage= ImageIO.read(currentImageFile);
             String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + "_0.jpg";
-            File archivoDestino = new File(okDirectory, nombreArchivo);
+            //File archivoDestino = new File(okDirectory, nombreArchivo);
+            File archivoDestino = new File(testDirectory, nombreArchivo);
             BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
             ImageIO.write(nuevaImagen, "jpg", archivoDestino);
             nextButton.doClick();
