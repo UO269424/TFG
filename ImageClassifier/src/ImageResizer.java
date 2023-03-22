@@ -31,12 +31,8 @@ public class ImageResizer {
                 try {
                     // Lee la imagen y la redimensiona
                     BufferedImage imagen = ImageIO.read(archivo);
-                    int anchoOriginal = imagen.getWidth();
-                    int altoOriginal = imagen.getHeight();
-                    int nuevoAncho = resolucion;
-                    int nuevoAlto = (altoOriginal * resolucion) / anchoOriginal;
-                    BufferedImage nuevaImagen = new BufferedImage(nuevoAncho, nuevoAlto, BufferedImage.TYPE_INT_RGB);
-                    nuevaImagen.createGraphics().drawImage(imagen.getScaledInstance(nuevoAncho, nuevoAlto, java.awt.Image.SCALE_SMOOTH), 0, 0, null);
+
+                    BufferedImage nuevaImagen = resize(imagen, resolucion);
 
                     // Guarda la imagen en la carpeta de destino
                     String nombreArchivo = archivo.getName().replaceAll("\\.\\w+$", "") + "_resized.jpg";
@@ -50,5 +46,16 @@ public class ImageResizer {
                 }
             }
         }
+    }
+
+    public static BufferedImage resize(BufferedImage imagen, int resolucion)    {
+
+        int anchoOriginal = imagen.getWidth();
+        int altoOriginal = imagen.getHeight();
+        int nuevoAncho = resolucion;
+        int nuevoAlto = resolucion;
+        BufferedImage nuevaImagen = new BufferedImage(nuevoAncho, nuevoAlto, BufferedImage.TYPE_INT_RGB);
+        nuevaImagen.createGraphics().drawImage(imagen.getScaledInstance(nuevoAncho, nuevoAlto, java.awt.Image.SCALE_SMOOTH), 0, 0, null);
+        return nuevaImagen;
     }
 }

@@ -66,7 +66,7 @@ public class ImageViewer extends JFrame implements ActionListener {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new ImageViewer().setVisible(true);
+            new ImageClassifier().setVisible(true);
         });
     }
 }
