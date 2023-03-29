@@ -15,10 +15,9 @@ public class ImageClassifier extends JFrame implements ActionListener {
     private int currentIndex;
     private String path;
 
-    private File cheatDirectory = new File("Cheat/");
-    private File okDirectory = new File("Ok/");
-
-    private File testDirectory = new File("TestingImages/");
+    private File trainDirectory = new File("Train/");
+    private File validationDirectory = new File("Validation/");
+    private File testDirectory = new File("Test/");
 
     private int resizeResolution = 50;
 
@@ -98,8 +97,9 @@ public class ImageClassifier extends JFrame implements ActionListener {
         try {
             BufferedImage currentImage= ImageIO.read(currentImageFile);
             String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + "_1.jpg";
-            //File archivoDestino = new File(cheatDirectory, nombreArchivo);
-            File archivoDestino = new File(testDirectory, nombreArchivo);
+            File archivoDestino = new File(trainDirectory, nombreArchivo);
+            //File archivoDestino = new File(validationDirectory, nombreArchivo);
+            //File archivoDestino = new File(testDirectory, nombreArchivo);
             BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
             ImageIO.write(nuevaImagen, "jpg", archivoDestino);
             nextButton.doClick();
@@ -113,8 +113,9 @@ public class ImageClassifier extends JFrame implements ActionListener {
         try {
             BufferedImage currentImage= ImageIO.read(currentImageFile);
             String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + "_0.jpg";
-            //File archivoDestino = new File(okDirectory, nombreArchivo);
-            File archivoDestino = new File(testDirectory, nombreArchivo);
+            File archivoDestino = new File(trainDirectory, nombreArchivo);
+            //File archivoDestino = new File(validationDirectory, nombreArchivo);
+            //File archivoDestino = new File(testDirectory, nombreArchivo);
             BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
             ImageIO.write(nuevaImagen, "jpg", archivoDestino);
             nextButton.doClick();
