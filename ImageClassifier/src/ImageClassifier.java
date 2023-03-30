@@ -95,14 +95,7 @@ public class ImageClassifier extends JFrame implements ActionListener {
     private void cheat(int currentIndex) {
         File currentImageFile = imageFiles[currentIndex];
         try {
-            BufferedImage currentImage= ImageIO.read(currentImageFile);
-            String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + "_1.jpg";
-            File archivoDestino = new File(trainDirectory, nombreArchivo);
-            //File archivoDestino = new File(validationDirectory, nombreArchivo);
-            //File archivoDestino = new File(testDirectory, nombreArchivo);
-            BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
-            ImageIO.write(nuevaImagen, "jpg", archivoDestino);
-            nextButton.doClick();
+            classify(currentImageFile, "_1.jpg");
         } catch (IOException e)   {
             System.out.println("Error al procesar la imagen " + currentImageFile.getName() + ": " + e.getMessage());
         }
@@ -111,17 +104,21 @@ public class ImageClassifier extends JFrame implements ActionListener {
     private void ok(int currentIndex) {
         File currentImageFile = imageFiles[currentIndex];
         try {
-            BufferedImage currentImage= ImageIO.read(currentImageFile);
-            String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + "_0.jpg";
-            File archivoDestino = new File(trainDirectory, nombreArchivo);
-            //File archivoDestino = new File(validationDirectory, nombreArchivo);
-            //File archivoDestino = new File(testDirectory, nombreArchivo);
-            BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
-            ImageIO.write(nuevaImagen, "jpg", archivoDestino);
-            nextButton.doClick();
+            classify(currentImageFile, "_0.jpg");
         } catch (IOException e)   {
             System.out.println("Error al procesar la imagen " + currentImageFile.getName() + ": " + e.getMessage());
         }
+    }
+
+    private void classify(File currentImageFile, String ending) throws IOException {
+        BufferedImage currentImage= ImageIO.read(currentImageFile);
+        String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + ending;
+        File archivoDestino = new File(trainDirectory, nombreArchivo);
+                            //new File(validationDirectory, nombreArchivo);
+                            //new File(testDirectory, nombreArchivo);
+        BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
+        ImageIO.write(nuevaImagen, "jpg", archivoDestino);
+        nextButton.doClick();
     }
 
     public static void main(String[] args) {
