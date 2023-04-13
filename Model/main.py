@@ -18,8 +18,10 @@ if __name__ == '__main__':
     print(mylist)
     for i in range(0,10):
         mylist.append(i)
-        if len(mylist) > 3:
+        if len(mylist) == 3:
+            print(mylist)
             mylist.pop(0)
-        print(mylist)
+
+
 
 # See PyCharm help at https://www.jetbrains.com/help/pycharm/

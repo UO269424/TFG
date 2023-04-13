@@ -62,6 +62,7 @@ public class ImageClassifier extends JFrame implements ActionListener {
         okButton.addActionListener(this);
         okButton.addKeyListener(myButtonKeyListener);
 
+
         // Agregar componentes a la ventana
         JPanel buttonPanel = new JPanel(new GridLayout(1, 2));
         buttonPanel.add(prevButton);
@@ -113,9 +114,9 @@ public class ImageClassifier extends JFrame implements ActionListener {
     private void classify(File currentImageFile, String ending) throws IOException {
         BufferedImage currentImage= ImageIO.read(currentImageFile);
         String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + ending;
-        File archivoDestino = new File(trainDirectory, nombreArchivo);
+        File archivoDestino = //new File(trainDirectory, nombreArchivo);
                             //new File(validationDirectory, nombreArchivo);
-                            //new File(testDirectory, nombreArchivo);
+                            new File(testDirectory, nombreArchivo);
         BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
         ImageIO.write(nuevaImagen, "jpg", archivoDestino);
         nextButton.doClick();
@@ -142,7 +143,7 @@ public class ImageClassifier extends JFrame implements ActionListener {
                 nextButton.doClick();
             } else if (e.getKeyCode() == KeyEvent.VK_LEFT)  {
                 prevButton.doClick();
-            } else if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+            } else if (e.getKeyCode() == KeyEvent.VK_K) {
                 okButton.doClick();
             } else if (e.getKeyCode() == KeyEvent.VK_F) {
                 cheatButton.doClick();

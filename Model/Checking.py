@@ -10,7 +10,7 @@ input_shape = (50, 50, 3)
 image_size = (224, 224)
 
 # directorio que contiene las imágenes de prueba
-test_dir = "../ImageClassifier/TestingImages"
+test_dir = "../ImageClassifier/Test"
 
 # lista para almacenar los tensores de entrada
 x_test = []

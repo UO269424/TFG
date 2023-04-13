@@ -9,71 +9,61 @@ from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten
 from keras.preprocessing import image
 from keras.models import load_model
 
+
 def main():
 
     # Definir las dimensiones de las imágenes de entrada
     input_shape = (50, 50, 3)
 
     # directorio que contiene las imágenes
-    directories = []
-    directories.append("../ImageClassifier/Train")
-    #directories.append("../ImageClassifier/Validation")
-    #directories.append("../ImageClassifier/TestingImages")
+    directory = "../ImageClassifier/Train"
+    #"../ImageClassifier/Validation"
+    #"../ImageClassifier/TestingImages"
 
     # tamaño de las imágenes que se espera que el modelo reciba como entrada
     image_size = (224, 224)
 
     # lista para almacenar los tensores de entrada
-    x_train = []
+    x_train = np.zeros((len(os.listdir(directory)) * 50 // 3, 3, *input_shape))
 
     # lista para almacenar las etiquetas de salida
-    y_train = []
+    y_train = np.zeros((len(os.listdir(directory)) * 50 // 3,))
 
     # iterar sobre los archivos en el directorio
-    for directory in directories:
-        for filename in os.listdir(directory):
-            sequence = []
-            names = []
-            if filename.endswith("_0.jpg") or filename.endswith("_1.jpg"):
-                rand = random.randint(0,49);
-                # cargar la imagen
-                img = Image.open(os.path.join(directory, filename))
+    idx = 0
+    for filename in os.listdir(directory):
+        if filename.endswith("_0.jpg") or filename.endswith("_1.jpg"):
+            rand = random.randint(0,49);
+            # cargar la imagen
+            img = Image.open(os.path.join(directory, filename))
 
-                # cambiar el tamaño de la imagen
-                #img = img.resize(image_size)
+            # cambiar el tamaño de la imagen
+            #img = img.resize(image_size)
 
-                if rand == 8:
-                    print("Processing " + filename)
+            if rand == 8:
+                print("Processing " + filename)
 
-                # convertir la imagen a un arreglo de NumPy
-                img_array = np.array(img)
+            # convertir la imagen a un arreglo de NumPy
+            img_array = np.array(img)
 
-                # agregar una dimensión para representar el "batch" (conjunto) de imágenes
-                img_tensor = np.expand_dims(img_array, axis=0)
+            # agregar una dimensión para representar el "batch" (conjunto) de imágenes
+            img_tensor = np.expand_dims(img_array, axis=0)
 
-                # agregar el tensor de entrada a la lista x_train
-                sequence.append(img_tensor)
-                names.append(filename)
+            # agregar el tensor de entrada a x_train
+            x_train[idx//3, idx%3, :, :, :] = img_tensor
 
-                if len(sequence) > 3:
-                    sequence.pop(0)
-                    names.pop(0)
-                    x_train.append(sequence)
+            # agregar la etiqueta de salida a y_train
+            if filename.endswith("_1.jpg"):
+                y_train[idx//3] = 1
+            else:
+                y_train[idx//3] = 0
 
+            idx += 1
 
-                # agregar la etiqueta de salida a la lista y_train
-                isCheat = False
-                for name in names:
-                    if name.endswith("_1.jpg"):
-                        isCheat = True
-
-                if isCheat:
-                    y_train.append(1)
-                else:
-                    y_train.append(0)
-
-    # concatenar los tensores de entrada en un solo tensor de entrenamiento
-    x_train = np.concatenate(x_train, axis=0)
+    print("Length of the x_train array = " + str(len(x_train)))
+    print("Length of the y_train array = " + str(len(y_train)))
+    # redimensionar x_train
+    x_train = x_train.reshape((-1,) + input_shape)
 
     # convertir la lista de etiquetas en un arreglo de NumPy
     y_train = np.array(y_train)
@@ -102,9 +92,7 @@ def main():
         # Compilar el modelo
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-
-
-    # Entrenar el modelo con los datos de entrada y etiquetas correspondientes
+        # Entrenar el modelo con los datos de entrada y etiquetas correspondientes
     model.fit(x_train, y_train, batch_size=32, epochs=10, validation_split=0.2)
 
     model.save('modelo_entrenado.h5')
@@ -112,6 +100,7 @@ def main():
 
 if __name__ == '__main__':
     main()
+
 
 
 
