@@ -41,9 +41,9 @@ def main():
         secuencia = [imagenes[i-2], imagenes[i-1], imagenes[i]]
         x_train.append(secuencia)
         isCheat = False
-        for name in names:
-            if name.endswith("_1.jpg"):
-                isCheat = True
+
+        if names[len(names)-1].endswith("_1.jpg"):
+            isCheat = True
 
         if isCheat:
             y_train.append(1)
