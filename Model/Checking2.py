@@ -6,6 +6,7 @@ from keras.preprocessing import image
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed
 from keras.models import load_model
+from sklearn.metrics import cohen_kappa_score
 
 
 def main():
@@ -39,31 +40,35 @@ def main():
     y_test = []
     for i in range(2, len(imagenes)):
         secuencia = [imagenes[i - 2], imagenes[i - 1], imagenes[i]]
+        nombres = [names[i-2], names[i-1], names[i]]
         x_test.append(secuencia)
-        isCheat = False
-        for name in names:
-            if name.endswith("_1.jpg"):
-                isCheat = True
-
-        if isCheat:
+        if nombres[len(nombres) - 1].endswith("_1.jpg"):
             y_test.append(1)
         else:
             y_test.append(0)
+
     x_test = np.array(x_test)
     y_test = np.array(y_test)
     y_test = y_test.reshape(-1, 1)
 
     print("Length of the x_test array = " + str(len(x_test)))
     print("Length of the y_test array = " + str(len(y_test)))
+    print(y_test)
 
 
     # cargar el modelo
-    model = load_model('modelo_entrenado.h5')
+    model = load_model('modelo-32.h5')
     print('Se ha cargado el modelo pre-entrenado.')
 
     # Evaluar el modelo con los datos de prueba
     score = model.evaluate(x_test, y_test, verbose=1)
+
+    predictions = model.predict(x_test)
+
+
     print("Accuracy:", score[1])
+
+    print(score)
 
 if __name__ == '__main__':
     main()

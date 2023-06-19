@@ -6,6 +6,7 @@ from keras.preprocessing import image
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed
 from keras.models import load_model
+from sklearn.feature_extraction.text import TfidfTransformer
 
 
 def main():
@@ -14,7 +15,8 @@ def main():
     sequence_shape = (3, 50, 50, 3)
 
     # Ruta de la carpeta con las imágenes
-    directory = "../ImageClassifier/Train"
+    #directory = "../ImageClassifier/Train"
+    directory = "C:/Users/Alonso/Desktop/Screenshots-Converted-v2"
 
     # Lista para almacenar las matrices de imágenes
     imagenes = []
@@ -32,33 +34,38 @@ def main():
             names.append(filename)
 
     # Convertir la lista de imágenes en una matriz NumPy
-    imagenes = np.array(imagenes)
+    #imagenes = np.array(imagenes)
 
     # Crear secuencias de imágenes y etiquetas correspondientes
     x_train = []
     y_train = []
     for i in range(2, len(imagenes)):
         secuencia = [imagenes[i-2], imagenes[i-1], imagenes[i]]
+        nombres = [names[i - 2], names[i - 1], names[i]]
         x_train.append(secuencia)
-        isCheat = False
-        for name in names:
-            if name.endswith("_1.jpg"):
-                isCheat = True
-
-        if isCheat:
+        if nombres[len(nombres)-1].endswith("_1.jpg"):
             y_train.append(1)
         else:
             y_train.append(0)
     x_train = np.array(x_train)
     y_train = np.array(y_train)
+
+    # Calcular los pesos de clases
+    class_weights = {0: inverseDocumentFrecuency(y_train)[0], 1: inverseDocumentFrecuency(y_train)[1]}
+
+
     y_train = y_train.reshape(-1, 1)
 
     print("Length of the x_train array = " + str(len(x_train)))
     print("Length of the y_train array = " + str(len(y_train)))
+    print("IDF for class [0] = " + str(class_weights[0]))
+    print("IDF for class [1] = " + str(class_weights[1]))
+
+
 
     # Crear un modelo secuencial
     try:
-        model = load_model('modelo_entrenado.h5')
+        model = load_model('modelo_entrenado-32-v2.h5')
         print('Se ha cargado el modelo pre-entrenado.')
     except:
         print('No se ha encontrado el modelo pre-entrenado. Se creará un nuevo modelo.')
@@ -81,10 +88,22 @@ def main():
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
     # Entrenar el modelo con los datos de entrada y etiquetas correspondientes
-    model.fit(x_train, y_train, batch_size=32, epochs=10, validation_split=0.2)
+    model.fit(x_train, y_train, batch_size=32, epochs=10, validation_split=0.2, class_weight = class_weights)
 
-    model.save('modelo_entrenado.h5')
+    model.save('modelo_entrenado-32-v2.h5')
 
+
+def inverseDocumentFrecuency(y_train):
+    # Obtener la cantidad de instancias de cada clase
+    class_counts = np.bincount(y_train)
+
+    # Calcular la frecuencia de clase inversa (IDF)
+    idf = np.log(len(y_train) / (1 + class_counts))
+
+    # Normalizar los valores de IDF entre 0 y 1
+    idf_normalized = idf / np.max(idf)
+
+    return idf_normalized
 
 if __name__ == '__main__':
     main()
