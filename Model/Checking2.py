@@ -6,6 +6,7 @@ from keras.preprocessing import image
 from keras.models import Sequential
 from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed
 from keras.models import load_model
+from sklearn.metrics import cohen_kappa_score
 
 
 def main():
@@ -56,12 +57,18 @@ def main():
 
 
     # cargar el modelo
-    model = load_model('modelo_entrenado.h5')
+    model = load_model('modelo-32.h5')
     print('Se ha cargado el modelo pre-entrenado.')
 
     # Evaluar el modelo con los datos de prueba
     score = model.evaluate(x_test, y_test, verbose=1)
+
+    predictions = model.predict(x_test)
+
+
     print("Accuracy:", score[1])
+
+    print(score)
 
 if __name__ == '__main__':
     main()
