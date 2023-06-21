@@ -23,6 +23,7 @@ def main():
     # Generar las secuencias de imágenes y obtener las etiquetas
     for i in range(len(nombres_archivos) - 2):
         secuencia = []
+        nombres=[]
         for j in range(3):
             nombre_archivo = nombres_archivos[i + j]
             ruta_imagen = os.path.join(carpeta_imagenes, nombre_archivo)
@@ -30,10 +31,11 @@ def main():
             imagen_array = img_to_array(imagen)
             imagen_array /= 255.0
             secuencia.append(imagen_array)
+            nombres.append(nombre_archivo)
         secuencias.append(secuencia)
 
         # Obtener la etiqueta de la secuencia
-        if nombres_archivos[i + 2].endswith("_1.jpg"):
+        if nombres[len(nombres)-1].endswith("_1.jpg"):
             etiqueta = 1  # "Copia"
         else:
             etiqueta = 0  # "No copia"
@@ -48,11 +50,8 @@ def main():
     model.add(TimeDistributed(Conv2D(32, (3, 3), activation='relu'),
                               input_shape=(3, dim_imagen[0], dim_imagen[1], canales_color)))
     model.add(TimeDistributed(MaxPooling2D(pool_size=(2, 2))))
-    model.add(TimeDistributed(Conv2D(64, (3, 3), activation='relu'),
-                              input_shape=(3, dim_imagen[0], dim_imagen[1], canales_color)))
-    model.add(TimeDistributed(MaxPooling2D(pool_size=(2, 2))))
     model.add(TimeDistributed(Flatten()))
-    model.add(LSTM(128, activation='relu'))
+    model.add(LSTM(64, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     # Compilar el modelo
@@ -62,7 +61,7 @@ def main():
     model.fit(x_train, y_train, epochs=10, validation_split=0.2)
 
     # Guardar el modelo entrenado
-    model.save('modelo-32.h5')
+    model.save('modelo.h5')
 
 
 if __name__ == '__main__':

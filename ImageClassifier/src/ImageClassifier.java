@@ -19,6 +19,9 @@ public class ImageClassifier extends JFrame implements ActionListener {
     private File validationDirectory = new File("Validation/");
     private File testDirectory = new File("Test/");
 
+    private File convertedImages = new File("C:/Users/Alonso/Desktop/Screenshots-Converted-v2");
+
+
     private int resizeResolution = 50;
 
     private MyButtonKeyListener myButtonKeyListener;
@@ -27,7 +30,9 @@ public class ImageClassifier extends JFrame implements ActionListener {
         super("Image Viewer");
 
         // Establecer la ruta de la carpeta de imágenes
-        path = "Screenshots/";
+        path = //"Screenshots/";
+                "C:/Users/Alonso/Desktop/Screenshots";
+                //"C:/Users/Alonso/Desktop/Screenshots-test-v1";
 
         myButtonKeyListener = new MyButtonKeyListener();
 
@@ -114,11 +119,13 @@ public class ImageClassifier extends JFrame implements ActionListener {
     private void classify(File currentImageFile, String ending) throws IOException {
         BufferedImage currentImage= ImageIO.read(currentImageFile);
         String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + ending;
-        File archivoDestino = //new File(trainDirectory, nombreArchivo);
-                            //new File(validationDirectory, nombreArchivo);
-                            new File(testDirectory, nombreArchivo);
+        File archivoDestino = new File(trainDirectory, nombreArchivo);
+//                new File(validationDirectory, nombreArchivo);
+//                new File(testDirectory, nombreArchivo);
         BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
         ImageIO.write(nuevaImagen, "jpg", archivoDestino);
+        File archivoConverted = new File(convertedImages, nombreArchivo);
+        ImageIO.write(nuevaImagen, "jpg", archivoConverted);
         nextButton.doClick();
     }
 
