@@ -148,19 +148,33 @@ def obtener_primer_indice_modelo(nombre_carpeta_modelos):
     return min(indices)
 
 
-def main():
-    secuencias_train, etiquetas_train = cargar_imagenes_etiquetas(carpeta_imagenes)
-    secuencias_test_1, etiquetas_test_1 = cargar_imagenes_etiquetas(carpeta_test_1)
-    secuencias_test_2, etiquetas_test_2 = cargar_imagenes_etiquetas(carpeta_test_2)
-    secuencias_test_3, etiquetas_test_3 = cargar_imagenes_etiquetas(carpeta_test_3)
+def obtener_precision_recall(model, x_test, y_test):
+    # Realizar las predicciones del modelo en el conjunto de prueba
+    y_pred = model.predict(x_test)
+    y_pred = np.array(y_pred).flatten()
+    y_pred = (y_pred > 0.5).astype(int)
 
+
+    # Calcular True Positives, False Positives y False Negatives
+    tp = np.sum(np.logical_and(y_pred == 1, y_test == 1))
+    fp = np.sum(np.logical_and(y_pred == 1, y_test == 0))
+    fn = np.sum(np.logical_and(y_pred == 0, y_test == 1))
+
+    # Calcular precision y recall
+    precision = tp / (tp + fp)
+    recall = tp / (tp + fn)
+
+    return precision, recall
+
+def entrenamiento(carpeta_imagenes, hiperparametros_csv, carpeta_modelos):
+    secuencias_train, etiquetas_train = cargar_imagenes_etiquetas(carpeta_imagenes)
 
     # Leer los hiperparámetros desde el archivo CSV
     parametros = leer_parametros_csv(hiperparametros_csv)
 
     ultimo_indice_modelo = obtener_ultimo_indice_modelo(carpeta_modelos)
 
-    resultados = []
+    modelos_entrenados = []
 
     for i, hiperparametros in parametros.iterrows():
         modelo_indice = ultimo_indice_modelo + i + 1
@@ -171,40 +185,70 @@ def main():
             print("Error en el modelo " + str(modelo_indice))
             continue;
         guardar_modelo(model, modelo_guardado)
+        modelos_entrenados.append((modelo_guardado, modelo_indice))
 
-        model = cargar_modelo(modelo_guardado)
-        score_1 = evaluar_modelo(model, secuencias_test_1, etiquetas_test_1)
-        score_2 = evaluar_modelo(model, secuencias_test_2, etiquetas_test_2)
-        score_3 = evaluar_modelo(model, secuencias_test_3, etiquetas_test_3)
+    return modelos_entrenados
 
-        resultado = {
-            'modelo': modelo_indice,
-            'conv_filters_1': hiperparametros['conv_filters_1'],
-            'conv_kernel_size': hiperparametros['conv_kernel_size'],
-            'strides': hiperparametros['strides'],
-            'pool_size': hiperparametros['pool_size'],
-            'conv_filters_2': hiperparametros['conv_filters_2'],
-            'conv_filters_3': hiperparametros['conv_filters_3'],
-            'conv_activation': hiperparametros['conv_activation'],
-            'rnn': hiperparametros['rnn'],
-            'rnn_units': hiperparametros['rnn_units'],
-            'rnn_activation': hiperparametros['rnn_activation'],
-            'optimizer': hiperparametros['optimizer'],
-            'epochs': hiperparametros['epochs'],
-            'loss-Test-1': score_1[0],
-            'accuracy-Test-1': score_1[1],
-            'loss-Test-2': score_2[0],
-            'accuracy-Test-2': score_2[1],
-            'loss-Test-3': score_3[0],
-            'accuracy-Test-3': score_3[1]
-        }
-        resultados.append(resultado)
+def probar_modelos(carpeta_modelos, carpeta_test_1, carpeta_test_2, carpeta_test_3, resultados_excel):
+    parametros = leer_parametros_csv(hiperparametros_csv)
+    resultados = []
+    secuencias_test_1, etiquetas_test_1 = cargar_imagenes_etiquetas(carpeta_test_1)
+    secuencias_test_2, etiquetas_test_2 = cargar_imagenes_etiquetas(carpeta_test_2)
+    secuencias_test_3, etiquetas_test_3 = cargar_imagenes_etiquetas(carpeta_test_3)
 
-        print('Modelo ' + str(modelo_indice) + ' score_1: ' + str(score_1))
-        print('Modelo ' + str(modelo_indice) + ' score_2: ' + str(score_2))
-        print('Modelo ' + str(modelo_indice) + ' score_3: ' + str(score_3))
+    i = 0
+    for nombre_archivo in os.listdir(carpeta_modelos):
+        if nombre_archivo.endswith('.h5'):
+            modelo_guardado = os.path.join(carpeta_modelos, nombre_archivo)
+            modelo_indice = int(nombre_archivo.split('-')[1].split('.')[0])
+            model = cargar_modelo(modelo_guardado)
+            score_1 = evaluar_modelo(model, secuencias_test_1, etiquetas_test_1)
+            metricas_1 = [score_1[0], score_1[1], obtener_precision_recall(model, secuencias_test_1, etiquetas_test_1)[0], obtener_precision_recall(model, secuencias_test_1, etiquetas_test_1)[1]]
+            score_2 = evaluar_modelo(model, secuencias_test_2, etiquetas_test_2)
+            metricas_2 = [score_2[0], score_2[1], obtener_precision_recall(model, secuencias_test_2, etiquetas_test_2)[0], obtener_precision_recall(model, secuencias_test_2, etiquetas_test_2)[1]]
+            score_3 = evaluar_modelo(model, secuencias_test_3, etiquetas_test_3)
+            metricas_3 = [score_3[0], score_3[1], obtener_precision_recall(model, secuencias_test_3, etiquetas_test_3)[0], obtener_precision_recall(model, secuencias_test_3, etiquetas_test_3)[1]]
+
+            resultado = {
+                'modelo': modelo_indice,
+                'conv_filters_1': parametros.at[i,'conv_filters_1'],
+                'conv_kernel_size': parametros.at[i,'conv_kernel_size'],
+                'strides': parametros.at[i,'strides'],
+                'pool_size': parametros.at[i,'pool_size'],
+                'conv_filters_2': parametros.at[i,'conv_filters_2'],
+                'conv_filters_3': parametros.at[i,'conv_filters_3'],
+                'conv_activation': parametros.at[i, 'conv_activation'],
+                'rnn': parametros.at[i,'rnn'],
+                'rnn_units': parametros.at[i,'rnn_units'],
+                'rnn_activation': parametros.at[i,'rnn_activation'],
+                'optimizer': parametros.at[i,'optimizer'],
+                'epochs': parametros.at[i,'epochs'],
+                'loss-Test-1': metricas_1[0],
+                'accuracy-Test-1': metricas_1[1],
+                'precision-Test-1': metricas_1[2],
+                'recall-Test-1': metricas_1[3],
+                'loss-Test-2': metricas_2[0],
+                'accuracy-Test-2': metricas_2[1],
+                'precision-Test-2': metricas_2[2],
+                'recall-Test-2': metricas_2[3],
+                'loss-Test-3': metricas_3[0],
+                'accuracy-Test-3': metricas_3[1],
+                'precision-Test-3': metricas_3[2],
+                'recall-Test-3': metricas_3[3],
+            }
+            resultados.append(resultado)
+
+            i+=1
+
+            print('Modelo ' + str(modelo_indice) + ' metricas_1: ' + str(metricas_1))
+            print('Modelo ' + str(modelo_indice) + ' metricas_2: ' + str(metricas_2))
+            print('Modelo ' + str(modelo_indice) + ' metricas_3: ' + str(metricas_3))
 
     escribir_resultados_excel(resultados, resultados_excel)
+
+def main():
+    #modelos_entrenados = entrenamiento(carpeta_imagenes, hiperparametros_csv, carpeta_modelos)
+    probar_modelos(carpeta_modelos, carpeta_test_1, carpeta_test_2, carpeta_test_3, resultados_excel)
 
 
 if __name__ == '__main__':
