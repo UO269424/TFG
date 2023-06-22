@@ -17,9 +17,9 @@ public class ImageClassifier extends JFrame implements ActionListener {
 
     private File trainDirectory = new File("Train/");
     private File validationDirectory = new File("Validation/");
-    private File testDirectory = new File("Test/");
+    private File testDirectory = new File("Test-v3/");
 
-    private File convertedImages = new File("C:/Users/Alonso/Desktop/Screenshots-Converted-v2");
+    //private File convertedImages = new File("C:/Users/Alonso/Desktop/Screenshots-Converted-v2");
 
 
     private int resizeResolution = 50;
@@ -119,13 +119,13 @@ public class ImageClassifier extends JFrame implements ActionListener {
     private void classify(File currentImageFile, String ending) throws IOException {
         BufferedImage currentImage= ImageIO.read(currentImageFile);
         String nombreArchivo = currentImageFile.getName().replaceAll("\\.\\w+$", "") + ending;
-        File archivoDestino = new File(trainDirectory, nombreArchivo);
+        File archivoDestino = //new File(trainDirectory, nombreArchivo);
 //                new File(validationDirectory, nombreArchivo);
-//                new File(testDirectory, nombreArchivo);
+                new File(testDirectory, nombreArchivo);
         BufferedImage nuevaImagen = ImageResizer.resize(currentImage, resizeResolution);
         ImageIO.write(nuevaImagen, "jpg", archivoDestino);
-        File archivoConverted = new File(convertedImages, nombreArchivo);
-        ImageIO.write(nuevaImagen, "jpg", archivoConverted);
+//        File archivoConverted = new File(convertedImages, nombreArchivo);
+//        ImageIO.write(nuevaImagen, "jpg", archivoConverted);
         nextButton.doClick();
     }
 

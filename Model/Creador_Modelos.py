@@ -4,13 +4,15 @@ import pandas as pd
 from tensorflow import keras
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from tensorflow.keras.models import Sequential
-from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, TimeDistributed, LSTM
+from tensorflow.keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, TimeDistributed, LSTM, GRU
 from tensorflow.keras.models import load_model
 import openpyxl
 
 # Ruta de la carpeta que contiene las imágenes
 carpeta_imagenes = "C:/Users/Alonso/Desktop/Screenshots-Converted-v2"
-carpeta_test = "../ImageClassifier/Test"
+carpeta_test_1 = "../ImageClassifier/Test"
+carpeta_test_2 = "../ImageClassifier/Test-v2"
+carpeta_test_3 = "../ImageClassifier/Test-v3"
 carpeta_modelos = 'Modelos'
 resultados_excel = 'Modelos/resultados.xlsx'
 hiperparametros_csv = 'hiperparametros.csv'
@@ -54,7 +56,7 @@ def entrenar_modelo(x_train, y_train, hiperparametros):
                                      (int(hiperparametros['conv_kernel_size']), int(hiperparametros['conv_kernel_size'])),
                                      strides=hiperparametros['strides'],
                                      padding='same',
-                                     activation='relu'),
+                                     activation=hiperparametros['conv_activation']),
                               input_shape=(3, dim_imagen[0], dim_imagen[1], canales_color)))
     model.add(TimeDistributed(MaxPooling2D(pool_size=(int(hiperparametros['pool_size']), int(hiperparametros['pool_size'])),
                                            padding='valid')))
@@ -63,11 +65,22 @@ def entrenar_modelo(x_train, y_train, hiperparametros):
                                          (int(hiperparametros['conv_kernel_size']), int(hiperparametros['conv_kernel_size'])),
                                          strides=hiperparametros['strides'],
                                          padding='same',
-                                         activation='relu')))
+                                         activation=hiperparametros['conv_activation'])))
+        model.add(TimeDistributed(MaxPooling2D(pool_size=(int(hiperparametros['pool_size']), int(hiperparametros['pool_size'])),
+                                               padding='valid')))
+    if hiperparametros['conv_filters_3'] != '-':
+        model.add(TimeDistributed(Conv2D(int(hiperparametros['conv_filters_3']),
+                                         (int(hiperparametros['conv_kernel_size']), int(hiperparametros['conv_kernel_size'])),
+                                         strides=hiperparametros['strides'],
+                                         padding='same',
+                                         activation=hiperparametros['conv_activation'])))
         model.add(TimeDistributed(MaxPooling2D(pool_size=(int(hiperparametros['pool_size']), int(hiperparametros['pool_size'])),
                                                padding='valid')))
     model.add(TimeDistributed(Flatten()))
-    model.add(LSTM(int(hiperparametros['lstm_units']), activation='relu'))
+    if(hiperparametros['rnn'] == 'LSTM'):
+        model.add(LSTM(int(hiperparametros['rnn_units']), activation=hiperparametros['rnn_activation']))
+    if(hiperparametros['rnn'] == 'GRU'):
+        model.add(GRU(int(hiperparametros['rnn_units']), activation=hiperparametros['rnn_activation']))
     model.add(Dense(1, activation='sigmoid'))
 
     model.compile(optimizer=hiperparametros['optimizer'], loss='binary_crossentropy', metrics=['accuracy'])
@@ -121,12 +134,26 @@ def obtener_ultimo_indice_modelo(nombre_carpeta_modelos):
         return 0
     modelos_existentes = os.listdir(nombre_carpeta_modelos)
     indices = [int(modelo.split('-')[1].split('.')[0]) for modelo in modelos_existentes if modelo.startswith('modelo-')]
+    if(indices == []):
+        return -1
     return max(indices)
+
+def obtener_primer_indice_modelo(nombre_carpeta_modelos):
+    if not os.path.exists(nombre_carpeta_modelos):
+        return 0
+    modelos_existentes = os.listdir(nombre_carpeta_modelos)
+    indices = [int(modelo.split('-')[1].split('.')[0]) for modelo in modelos_existentes if modelo.startswith('modelo-')]
+    if(indices == []):
+        return -1
+    return min(indices)
 
 
 def main():
     secuencias_train, etiquetas_train = cargar_imagenes_etiquetas(carpeta_imagenes)
-    secuencias_test, etiquetas_test = cargar_imagenes_etiquetas(carpeta_test)
+    secuencias_test_1, etiquetas_test_1 = cargar_imagenes_etiquetas(carpeta_test_1)
+    secuencias_test_2, etiquetas_test_2 = cargar_imagenes_etiquetas(carpeta_test_2)
+    secuencias_test_3, etiquetas_test_3 = cargar_imagenes_etiquetas(carpeta_test_3)
+
 
     # Leer los hiperparámetros desde el archivo CSV
     parametros = leer_parametros_csv(hiperparametros_csv)
@@ -138,12 +165,17 @@ def main():
     for i, hiperparametros in parametros.iterrows():
         modelo_indice = ultimo_indice_modelo + i + 1
         modelo_guardado = os.path.join(carpeta_modelos, 'modelo-' + str(modelo_indice) + '.h5')
-
-        model = entrenar_modelo(secuencias_train, etiquetas_train, hiperparametros)
+        try:
+            model = entrenar_modelo(secuencias_train, etiquetas_train, hiperparametros)
+        except:
+            print("Error en el modelo " + str(modelo_indice))
+            continue;
         guardar_modelo(model, modelo_guardado)
 
         model = cargar_modelo(modelo_guardado)
-        score = evaluar_modelo(model, secuencias_test, etiquetas_test)
+        score_1 = evaluar_modelo(model, secuencias_test_1, etiquetas_test_1)
+        score_2 = evaluar_modelo(model, secuencias_test_2, etiquetas_test_2)
+        score_3 = evaluar_modelo(model, secuencias_test_3, etiquetas_test_3)
 
         resultado = {
             'modelo': modelo_indice,
@@ -152,15 +184,25 @@ def main():
             'strides': hiperparametros['strides'],
             'pool_size': hiperparametros['pool_size'],
             'conv_filters_2': hiperparametros['conv_filters_2'],
-            'lstm_units': hiperparametros['lstm_units'],
+            'conv_filters_3': hiperparametros['conv_filters_3'],
+            'conv_activation': hiperparametros['conv_activation'],
+            'rnn': hiperparametros['rnn'],
+            'rnn_units': hiperparametros['rnn_units'],
+            'rnn_activation': hiperparametros['rnn_activation'],
             'optimizer': hiperparametros['optimizer'],
             'epochs': hiperparametros['epochs'],
-            'loss': score[0],
-            'accuracy': score[1]
+            'loss-Test-1': score_1[0],
+            'accuracy-Test-1': score_1[1],
+            'loss-Test-2': score_2[0],
+            'accuracy-Test-2': score_2[1],
+            'loss-Test-3': score_3[0],
+            'accuracy-Test-3': score_3[1]
         }
         resultados.append(resultado)
 
-        print('Modelo ' + str(modelo_indice) + ' score: ' + str(score))
+        print('Modelo ' + str(modelo_indice) + ' score_1: ' + str(score_1))
+        print('Modelo ' + str(modelo_indice) + ' score_2: ' + str(score_2))
+        print('Modelo ' + str(modelo_indice) + ' score_3: ' + str(score_3))
 
     escribir_resultados_excel(resultados, resultados_excel)
 
