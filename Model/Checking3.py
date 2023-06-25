@@ -1,14 +1,8 @@
 import os
 import numpy as np
-from PIL import Image
-from tensorflow import keras
-import keras
-from keras.preprocessing import image
-from keras.models import Sequential
-from keras.layers import Dense, Conv2D, MaxPooling2D, Flatten, TimeDistributed
 from keras.models import load_model
-from tensorflow.keras.preprocessing.image import load_img, img_to_array
-from sklearn.metrics import cohen_kappa_score
+from keras.preprocessing.image import load_img, img_to_array
+
 
 
 def main():
