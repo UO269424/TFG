@@ -6,10 +6,11 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Alert {
 
-    private List<Path> images= new ArrayList<>();
+    private List<Path> images= new CopyOnWriteArrayList<>();
     private User user;
 
     private boolean displayed = false;

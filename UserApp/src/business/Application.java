@@ -1,5 +1,6 @@
 package business;
 
+import business.observer.MyObserver;
 import util.ImageHandler;
 
 import java.nio.file.Path;
@@ -10,24 +11,24 @@ public class Application implements Runnable{
     private Path new_image, old_image;
     private Set<User> users;
     private CommandExecutor commandExecutor;
-    private List<Observer> observers = new ArrayList<>();
+    private List<MyObserver> observers = new ArrayList<>();
 
     public Application()    {
         users = new HashSet<>();
         commandExecutor = new CommandExecutor();
     }
 
-    public void addObserver(Observer observer) {
+    public void addObserver(MyObserver observer) {
         observers.add(observer);
     }
 
-    public void removeObserver(Observer observer) {
+    public void removeObserver(MyObserver observer) {
         observers.remove(observer);
     }
 
     public void notifyObservers() {
-        for (Observer observer : observers) {
-            observer.update(new Observable(), new_image);
+        for (MyObserver observer : observers) {
+            observer.update();
         }
     }
     @Override
@@ -61,7 +62,10 @@ public class Application implements Runnable{
                         }
                         else {
                             Alert alert = AlertHandler.getInstance().findLastAlertByUser(u);
-                            alert.addImage(new_image);
+                            if(alert!=null)
+                                alert.addImage(new_image);
+                            else
+                                alert = new Alert(u);
                         }
                         notifyObservers();
                     }

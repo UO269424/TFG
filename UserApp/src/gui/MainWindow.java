@@ -2,128 +2,80 @@ package gui;
 
 import business.Alert;
 import business.AlertHandler;
+import business.observer.MyObserver;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
-public class MainWindow extends JFrame implements Observer {
-
-    private JPanel alertsPanel;
-    private List<AlertPanel> alertPanelsList;
+public class MainWindow extends JFrame implements MyObserver {
 
     private static MainWindow instance;
 
-    public static MainWindow getInstance(EnterWindow parent)  {
-        if(instance == null)   {
-            instance = new MainWindow(parent);
+    public static MainWindow getInstance() {
+        if(instance == null) {
+            instance = new MainWindow();
         }
         return instance;
     }
 
-    private MainWindow(EnterWindow parent) {
-        setTitle("Image Classification App");
+    private MainWindow() {
+
+        setTitle("Alert List");
+        setSize(400, 300);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(800, 600);
-        setLocationRelativeTo(null);
-
-        // Panel principal
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BorderLayout());
-
-        // Panel de alertas
-        alertsPanel = new JPanel();
-        alertsPanel.setLayout(new BoxLayout(alertsPanel, BoxLayout.Y_AXIS));
-        JScrollPane alertsScrollPane = new JScrollPane(alertsPanel);
-        mainPanel.add(alertsScrollPane, BorderLayout.CENTER);
-
-        // Botón de eliminar todas las alertas
-        JButton clearAllButton = new JButton("Eliminar todas las alertas");
-        clearAllButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                clearAllAlerts();
-            }
-        });
-        mainPanel.add(clearAllButton, BorderLayout.SOUTH);
-
-        // Agregar panel principal a la ventana
-        add(mainPanel);
-
-        // Inicializar lista de alertas
-        alertPanelsList = new ArrayList<>();
-
-        // Mostrar la ventana
+        initComponents();
         setVisible(true);
     }
 
-    // Método para crear una nueva alerta
-    public void createAlert(Alert a) {
-        List<ImageIcon> images = new ArrayList<>();
-        for(Path path: a.getImages())   {
-            images.add(new ImageIcon(String.valueOf(path)));
-        }
-        AlertPanel alertPanel = new AlertPanel(images);
-        alertsPanel.add(alertPanel);
-        alertPanelsList.add(alertPanel);
-        validate();
-        repaint();
-        a.setDisplayed(true);
-    }
+    private void initComponents() {
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
 
-    // Método para eliminar todas las alertas
-    public void clearAllAlerts() {
-        alertsPanel.removeAll();
-        alertPanelsList.clear();
-        AlertHandler.getInstance().removeDisplayedAlerts();
-        validate();
-        repaint();
+        List<Alert> alerts = AlertHandler.getInstance().getNotDisplayedAlerts();
+        for (Alert alert : alerts) {
+            JLabel label = new JLabel(String.format("%s@%s", alert.getUser().getName(), alert.getUser().getIp()));
+            JButton viewImagesButton = new JButton("View Images");
+            JButton removeAlertButton = new JButton("Remove Alert");
+
+            viewImagesButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    ImageViewer imageViewerFrame = new ImageViewer(alert.getImages());
+                }
+            });
+
+            removeAlertButton.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    AlertHandler.getInstance().removeAlert(alert);
+                    update();
+                }
+            });
+
+            JPanel alertPanel = new JPanel();
+            alertPanel.setLayout(new FlowLayout());
+            alertPanel.add(label, BorderLayout.CENTER);
+            alertPanel.add(viewImagesButton, BorderLayout.WEST);
+            alertPanel.add(removeAlertButton, BorderLayout.EAST);
+
+            panel.add(alertPanel);
+        }
+
+        JScrollPane scrollPane = new JScrollPane(panel);
+        add(scrollPane);
     }
 
     @Override
-    public void update(Observable o, Object arg) {
-        for(Alert a : AlertHandler.getInstance().notDisplayedAlerts()) {
-            createAlert(a);
-        }
+    public void update() {
+        getContentPane().removeAll();
+        initComponents();
+        revalidate();
+        repaint();
     }
 
-    // Clase interna para representar una alerta individual
-    private class AlertPanel extends JPanel {
-        private List<ImageIcon> images;
-
-        public AlertPanel(List<ImageIcon> images) {
-            this.images = images;
-            setLayout(new FlowLayout());
-
-            // Agregar imágenes al panel de alerta
-            for (ImageIcon image : images) {
-                JLabel imageLabel = new JLabel(image);
-                add(imageLabel);
-            }
-
-            // Botón para eliminar la alerta
-            JButton removeButton = new JButton("Eliminar alerta");
-            removeButton.addActionListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    removeAlert();
-                }
-            });
-            add(removeButton);
-        }
-
-        // Método para eliminar la alerta actual
-        private void removeAlert() {
-            alertsPanel.remove(this);
-            alertPanelsList.remove(this);
-            validate();
-            repaint();
-        }
-    }
 }

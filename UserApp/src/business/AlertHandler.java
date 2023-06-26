@@ -30,7 +30,7 @@ public class AlertHandler {
         return null;
     }
 
-    public List<Alert> notDisplayedAlerts() {
+    public List<Alert> getNotDisplayedAlerts() {
         List<Alert> notDisplayed = new ArrayList<>();
         for(Alert a : alerts)   {
             if(!a.isDisplayed())

@@ -51,7 +51,7 @@ public class EnterWindow extends JFrame {
     }
 
     private void openMainWindow()   {
-        mainWindow = MainWindow.getInstance(this);
+        mainWindow = MainWindow.getInstance();
         mainWindow.setLocationRelativeTo(this);
         mainWindow.setEnabled(true);
         mainWindow.setVisible(true);
