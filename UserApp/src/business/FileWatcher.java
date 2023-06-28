@@ -1,5 +1,7 @@
 package business;
 
+import com.sun.nio.file.SensitivityWatchEventModifier;
+
 import java.io.IOException;
 import java.nio.file.*;
 
@@ -19,7 +21,8 @@ public class FileWatcher implements Runnable{
             // Crear el WatchService y registrar la carpeta a monitorear
             WatchService watchService = FileSystems.getDefault().newWatchService();
             Path directory = Paths.get(folderPath); // Reemplaza con la ruta correcta
-            directory.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+//            directory.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+            directory.register(watchService, new WatchEvent.Kind[]{StandardWatchEventKinds.ENTRY_CREATE}, SensitivityWatchEventModifier.HIGH);
 
             // Monitorear la carpeta en busca de eventos
             while (true) {

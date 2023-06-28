@@ -54,22 +54,21 @@ public class Application implements Runnable{
 
                 u.newImage(new_image);
 
-                if(u.isSequenceComplete())  {
-                    evaluateSequence(u);
-                    if(u.getCurrentSequence().isCheat())    {
-                        if(!u.getPreviousSequence().isCheat())  {
-                            Alert alert = new Alert(u);
-                        }
-                        else {
-                            Alert alert = AlertHandler.getInstance().findLastAlertByUser(u);
-                            if(alert!=null)
-                                alert.addImage(new_image);
-                            else
-                                alert = new Alert(u);
-                        }
-                        notifyObservers();
+                evaluateSequence(u);
+                if(u.getCurrentSequence().isCheat())    {
+                    if(!u.getPreviousSequence().isCheat())  {
+                        Alert alert = new Alert(u);
                     }
+                    else {
+                        Alert alert = AlertHandler.getInstance().findLastAlertByUser(u);
+                        if(alert!=null)
+                            alert.addImage(new_image);
+                        else
+                            alert = new Alert(u);
+                    }
+                    notifyObservers();
                 }
+
                 old_image = new_image;
             }
         }
@@ -77,10 +76,23 @@ public class Application implements Runnable{
     }
 
     private void evaluateSequence(User u) {
-        Path[] sequence = u.getCurrentSequence().getSecuencia();
-        String evaluation = commandExecutor.execute(sequence);
-        if(Integer.parseInt(evaluation) == 1)
+        Path image = u.getCurrentSequence().getSecuencia()[u.getCurrentSequence().getSecuencia().length-1];
+        String evaluation = commandExecutor.execute(u.getName(), image);
+        int result = 0;
+        try {
+            result = Integer.parseInt(evaluation);
+        }
+        catch(NumberFormatException e) {
+            System.err.println(e.getMessage());
+            return;
+        }
+        if( result == 1 && u.isSequenceComplete()) {
+            System.out.println("Sequence completed flagged cheat");
             u.getCurrentSequence().setCheat(true);
+        }
+        else
+            System.out.println("Sequence incomplete or not cheat");
+
     }
 
 

@@ -29,6 +29,7 @@ public class ImageSequence {
             secuencia[i] = secuencia[i+1];
         }
         secuencia[secuencia.length-1] = imagePath;
+        this.cheat = false;
     }
 
     public Path[] getSecuencia() {

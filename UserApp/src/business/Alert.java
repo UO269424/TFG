@@ -10,14 +10,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Alert {
 
-    private List<Path> images= new CopyOnWriteArrayList<>();
+    private List<Path> images;
     private User user;
 
     private boolean displayed = false;
 
     public Alert(User u) {
         this.user = u;
-        this.images = Arrays.asList(u.getCurrentSequence().getSecuencia());
+        this.images= new CopyOnWriteArrayList<>();
+        for (Path path: u.getCurrentSequence().getSecuencia()) {
+            addImage(path);
+        }
         AlertHandler.getInstance().addAlert(this);
 
     }
