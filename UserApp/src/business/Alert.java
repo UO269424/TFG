@@ -3,6 +3,7 @@ package business;
 import util.ImageHandler;
 
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -26,7 +27,19 @@ public class Alert {
     }
 
     public void addImage(Path path)   {
-        images.add(path);
+        String s = String.valueOf(path);
+        StringBuilder sb = new StringBuilder();
+        String[] path_split = s.split("\\\\");
+        if(path_split[path_split.length-2].equals("miniaturas"))  {
+            for(int i =0; i< path_split.length; i++)    {
+                if(i!= path_split.length)   {
+                    sb.append(path_split[i]);
+                    sb.append("\\");
+                }
+            }
+            s = sb.toString();
+        }
+        images.add(Paths.get(s));
     }
 
     public List<Path> getImages() {

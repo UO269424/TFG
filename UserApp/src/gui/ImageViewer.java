@@ -1,6 +1,4 @@
 package gui;
-
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -53,16 +51,36 @@ class ImageViewer extends JFrame {
             }
         });
 
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+        buttonPanel.add(previousButton);
+        buttonPanel.add(Box.createVerticalStrut(10));
+        buttonPanel.add(nextButton);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
         setLayout(new BorderLayout());
         add(imageLabel, BorderLayout.CENTER);
-        add(previousButton, BorderLayout.WEST);
-        add(nextButton, BorderLayout.EAST);
+        add(buttonPanel, BorderLayout.EAST);
+
+        // Agregar un ComponentListener para detectar cambios de tamaño en la ventana
+        addComponentListener(new java.awt.event.ComponentAdapter() {
+            public void componentResized(java.awt.event.ComponentEvent evt) {
+                updateImage();
+            }
+        });
     }
 
     private void updateImage() {
         Path imagePath = imagePaths.get(currentIndex);
         ImageIcon imageIcon = new ImageIcon(imagePath.toString());
-        Image image = imageIcon.getImage().getScaledInstance(300, 300, Image.SCALE_SMOOTH);
-        imageLabel.setIcon(new ImageIcon(image));
+        int width = imageLabel.getWidth();
+        int height = imageLabel.getHeight();
+        if(width == 0 || height == 0)   {
+            width = 300;
+            height = 300;
+        }
+        Image image = imageIcon.getImage().getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        imageIcon.setImage(image);
+        imageLabel.setIcon(imageIcon);
     }
 }

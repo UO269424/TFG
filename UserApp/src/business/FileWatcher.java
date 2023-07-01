@@ -8,7 +8,8 @@ import java.nio.file.*;
 public class FileWatcher implements Runnable{
 
     // Ruta de la carpeta a monitorear
-    String folderPath = "C:\\Users\\Alonso\\Desktop\\Screenshots";
+    String folderPath = "C:\\Users\\Alonso\\Desktop\\Screenshots\\miniatures";
+    //String folderPath = "C:\\Users\\Alonso\\Desktop\\Screenshots";
     private Application applicationThread;
 
     public FileWatcher(Application applicationThread) {

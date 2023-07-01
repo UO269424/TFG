@@ -9,6 +9,8 @@ import keras.utils as image
 import argparse
 from PIL import Image
 
+Image.LOAD_TRUNCATED_IMAGES = True
+
 import datetime
 
 users = dict()
@@ -23,18 +25,20 @@ def user_information(user):
     global users
     if request.method == 'GET':
         if(user in users.keys()):
-            return users[user]
+            return users[user]['images']
         return "User '{}' not found".format(user)
     if request.method == 'POST':
         if (user not in users.keys()):
-            users[user] = []
+            users[user] = dict()
+            users[user]['model'] = model = load_model(modelo)
+            users[user]['images'] = []
         request_data = request.get_json()
         image = request_data['file']
-        users[user].append(image)
-        if(len(users[user]) < 3):
+        users[user]['images'].append(image)
+        if(len(users[user]['images']) < 3):
             #return "New Image added: '{}'".format(image)
             return "0" # por simplicidad imprimo "no hay copia"
-        result = main(users[user][-3], users[user][-2], users[user][-1])
+        result = main(users[user]['model'], users[user]['images'][-3], users[user]['images'][-2], users[user]['images'][-1])
         return "{}".format(result)
     if request.method == 'DELETE':
         if (user in users.keys()):
@@ -54,10 +58,12 @@ modelo = '../Model/Modelos/modelo-50.h5'
 
 def cargar_imagen(ruta):
     imagen = Image.open(ruta)
+
     return imagen
 
 
 def convertir_a_jpg(imagen):
+    imagen.load()
     imagen_jpg = imagen.convert("RGB")
     return imagen_jpg
 
@@ -82,8 +88,8 @@ def cargar_imagenes(ruta_imagen_1, ruta_imagen_2, ruta_imagen_3):
 
     return secuencia
 
-model = load_model(modelo)
-def main(ruta_imagen_1, ruta_imagen_2, ruta_imagen_3):
+
+def main(model, ruta_imagen_1, ruta_imagen_2, ruta_imagen_3):
 
 
     secuencia = cargar_imagenes(ruta_imagen_1, ruta_imagen_2, ruta_imagen_3)
@@ -94,19 +100,21 @@ def main(ruta_imagen_1, ruta_imagen_2, ruta_imagen_3):
     # Acción basada en la clase asignada
     if clase == 0:
         #sys.exit('0')
+        print("{0}\n{1}\n{2} - 0\n".format(ruta_imagen_1, ruta_imagen_2, ruta_imagen_3))
         return "0"
     elif clase == 1:
         #sys.exit('1')
+        print("{0}\n{1}\n{2} - 1\n".format(ruta_imagen_1, ruta_imagen_2, ruta_imagen_3))
         return "1"
 
 start = 0
 
 if __name__ == '__main__':
     start = datetime.datetime.now()
-    parser = argparse.ArgumentParser();
+    parser = argparse.ArgumentParser()
     parser.add_argument("arg1", help="Ruta de la primera imágen de la secuencia")
     parser.add_argument("arg2", help="Ruta de la segunda imágen de la secuencia")
     parser.add_argument("arg3", help="Ruta de la tercera imágen de la secuencia")
-    args = parser.parse_args();
+    args = parser.parse_args()
     main(args.arg1, args.arg2, args.arg3)
 

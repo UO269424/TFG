@@ -25,9 +25,15 @@ public class CommandExecutor {
 
     public String execute(String user, Path image)   {
         Long elapsed = System.currentTimeMillis();
-        System.out.println(String.format("Nueva imagen: %s", image));
+        //System.out.println(String.format("Nueva imagen: %s", image));
         String img1 = String.valueOf(image);
         HttpClient httpClient = HttpClientBuilder.create().build();
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
 
         String url = String.format("http://127.0.0.1:5000/users/%s", user);
         HttpPost post = new HttpPost(url);
@@ -50,14 +56,15 @@ public class CommandExecutor {
             if(response.getStatusLine().getStatusCode() == 200) {
                 ByteArrayOutputStream out = new ByteArrayOutputStream();
                 response.getEntity().getContent().transferTo(out);
-                System.out.println(String.format("Elapsed time for petition = %d", System.currentTimeMillis()-elapsed));
-                System.out.println(out.toString());
+                //System.out.println(String.format("Elapsed time for petition = %d", System.currentTimeMillis()-elapsed));
+                //System.out.println(out.toString());
                 return out.toString();
             }
         }catch (IOException e)
         {
             System.err.println(e.getMessage());
         }
+        return "0";
 
         /*
         Runtime rt = Runtime.getRuntime();
@@ -91,6 +98,7 @@ public class CommandExecutor {
         }
  */
 
-        return null;
+        //return null;
     }
 }
+
