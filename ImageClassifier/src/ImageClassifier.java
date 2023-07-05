@@ -54,8 +54,8 @@ public class ImageClassifier extends JFrame implements ActionListener {
 
         // Configurar componentes
         imageLabel = new JLabel(images[currentIndex]);
-        prevButton = new JButton("Anterior");
-        nextButton = new JButton("Siguiente");
+        prevButton = new JButton("Previous");
+        nextButton = new JButton("Next");
         cheatButton = new JButton("Cheating");
         okButton = new JButton("Ok");
         prevButton.addActionListener(this);
