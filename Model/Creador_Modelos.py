@@ -11,10 +11,8 @@ import openpyxl
 # Ruta de la carpeta que contiene las imágenes
 carpeta_imagenes = "C:/Users/Alonso/Desktop/Screenshots-Converted-v2"
 carpeta_test_1 = "../ImageClassifier/Test"
-carpeta_test_2 = "../ImageClassifier/Test-v2"
-carpeta_test_3 = "../ImageClassifier/Test-v3"
 carpeta_modelos = 'Modelos'
-resultados_excel = 'Modelos/resultados.xlsx'
+resultados_excel = 'Resultados/resultados.xlsx'
 hiperparametros_csv = 'hiperparametros.csv'
 
 # Parámetros de las imágenes
@@ -166,6 +164,10 @@ def obtener_precision_recall(model, x_test, y_test):
 
     return precision, recall
 
+def f_score(beta, precision, recall):
+    f_beta = ((1 + beta**2)*((precision*recall)/((beta**2*precision)+recall)))
+    return f_beta
+
 def entrenamiento(carpeta_imagenes, hiperparametros_csv, carpeta_modelos):
     secuencias_train, etiquetas_train = cargar_imagenes_etiquetas(carpeta_imagenes)
 
@@ -193,8 +195,6 @@ def probar_modelos(carpeta_modelos, carpeta_test_1, carpeta_test_2, carpeta_test
     parametros = leer_parametros_csv(hiperparametros_csv)
     resultados = []
     secuencias_test_1, etiquetas_test_1 = cargar_imagenes_etiquetas(carpeta_test_1)
-    secuencias_test_2, etiquetas_test_2 = cargar_imagenes_etiquetas(carpeta_test_2)
-    secuencias_test_3, etiquetas_test_3 = cargar_imagenes_etiquetas(carpeta_test_3)
 
     i = 0
     for nombre_archivo in os.listdir(carpeta_modelos):
@@ -202,12 +202,11 @@ def probar_modelos(carpeta_modelos, carpeta_test_1, carpeta_test_2, carpeta_test
             modelo_guardado = os.path.join(carpeta_modelos, nombre_archivo)
             modelo_indice = int(nombre_archivo.split('-')[1].split('.')[0])
             model = cargar_modelo(modelo_guardado)
+
             score_1 = evaluar_modelo(model, secuencias_test_1, etiquetas_test_1)
-            metricas_1 = [score_1[0], score_1[1], obtener_precision_recall(model, secuencias_test_1, etiquetas_test_1)[0], obtener_precision_recall(model, secuencias_test_1, etiquetas_test_1)[1]]
-            score_2 = evaluar_modelo(model, secuencias_test_2, etiquetas_test_2)
-            metricas_2 = [score_2[0], score_2[1], obtener_precision_recall(model, secuencias_test_2, etiquetas_test_2)[0], obtener_precision_recall(model, secuencias_test_2, etiquetas_test_2)[1]]
-            score_3 = evaluar_modelo(model, secuencias_test_3, etiquetas_test_3)
-            metricas_3 = [score_3[0], score_3[1], obtener_precision_recall(model, secuencias_test_3, etiquetas_test_3)[0], obtener_precision_recall(model, secuencias_test_3, etiquetas_test_3)[1]]
+            precision_1 = obtener_precision_recall(model, secuencias_test_1, etiquetas_test_1)[0]
+            recall_1 = obtener_precision_recall(model, secuencias_test_1, etiquetas_test_1)[1]
+            metricas_1 = [score_1[1], precision_1, recall_1, f_score(1, precision_1, recall_1), f_score(2, precision_1, recall_1)]
 
             resultado = {
                 'modelo': modelo_indice,
@@ -223,26 +222,17 @@ def probar_modelos(carpeta_modelos, carpeta_test_1, carpeta_test_2, carpeta_test
                 'rnn_activation': parametros.at[i,'rnn_activation'],
                 'optimizer': parametros.at[i,'optimizer'],
                 'epochs': parametros.at[i,'epochs'],
-                'loss-Test-1': metricas_1[0],
-                'accuracy-Test-1': metricas_1[1],
-                'precision-Test-1': metricas_1[2],
-                'recall-Test-1': metricas_1[3],
-                'loss-Test-2': metricas_2[0],
-                'accuracy-Test-2': metricas_2[1],
-                'precision-Test-2': metricas_2[2],
-                'recall-Test-2': metricas_2[3],
-                'loss-Test-3': metricas_3[0],
-                'accuracy-Test-3': metricas_3[1],
-                'precision-Test-3': metricas_3[2],
-                'recall-Test-3': metricas_3[3],
+                'accuracy-Test-1': metricas_1[0],
+                'precision-Test-1': metricas_1[1],
+                'recall-Test-1': metricas_1[2],
+                'f1-Test-1': metricas_1[3],
+                'f2-Test-1': metricas_1[4],
             }
             resultados.append(resultado)
 
             i+=1
 
             print('Modelo ' + str(modelo_indice) + ' metricas_1: ' + str(metricas_1))
-            print('Modelo ' + str(modelo_indice) + ' metricas_2: ' + str(metricas_2))
-            print('Modelo ' + str(modelo_indice) + ' metricas_3: ' + str(metricas_3))
 
     escribir_resultados_excel(resultados, resultados_excel)
 

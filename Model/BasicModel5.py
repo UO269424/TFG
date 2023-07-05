@@ -45,21 +45,27 @@ def main():
 
     # Definir el modelo
     model = Sequential()
-    model.add(TimeDistributed(Conv2D(32, (3, 3), activation='relu'),
+    model.add(TimeDistributed(Conv2D(8, (4, 4), strides=2, padding='same', activation='relu'),
                               input_shape=(3, dim_imagen[0], dim_imagen[1], canales_color)))
-    model.add(TimeDistributed(MaxPooling2D(pool_size=(2, 2))))
+    model.add(TimeDistributed(MaxPooling2D(pool_size=(2, 2), padding='valid')))
+    model.add(TimeDistributed(Conv2D(16, (4, 4), strides=2, padding='same', activation='relu')))
+    model.add(TimeDistributed(MaxPooling2D(pool_size=(2, 2), padding='valid')))
+    model.add(TimeDistributed(Conv2D(32, (4, 4), strides=2, padding='same', activation='relu')))
+    model.add(TimeDistributed(MaxPooling2D(pool_size=(1, 1), padding='valid')))
+    model.add(TimeDistributed(Conv2D(64, (4, 4), strides=2, padding='same', activation='relu')))
+    model.add(TimeDistributed(MaxPooling2D(pool_size=(1, 1), padding='valid')))
     model.add(TimeDistributed(Flatten()))
-    model.add(LSTM(64, activation='relu'))
+    model.add(LSTM(16, activation='relu'))
     model.add(Dense(1, activation='sigmoid'))
 
     # Compilar el modelo
-    model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
+    model.compile(optimizer='RMSprop', loss='binary_crossentropy', metrics=['accuracy'])
 
     # Entrenar el modelo
-    model.fit(x_train, y_train, epochs=30)
+    model.fit(x_train, y_train, epochs=10)
 
     # Guardar el modelo entrenado
-    model.save('modelo-32.h5')
+    model.save('modelo-0.h5')
 
 
 
